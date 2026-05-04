@@ -1,4 +1,5 @@
 import json
+import socket
 from unittest.mock import patch
 from urllib import error
 
@@ -50,6 +51,31 @@ def test_http_ai_client_raises_on_connection_error() -> None:
 
     with patch("urllib.request.urlopen", side_effect=error.URLError("connection refused")):
         with pytest.raises(HTTPAIClientError, match="Local AI request failed"):
+            client.generate_response("hello")
+
+
+def test_http_ai_client_raises_on_http_error_status() -> None:
+    client = HTTPAIClient(base_url="http://127.0.0.1:11434", timeout_seconds=1.0)
+
+    with patch(
+        "urllib.request.urlopen",
+        side_effect=error.HTTPError(
+            url="http://127.0.0.1:11434/generate",
+            code=503,
+            msg="service unavailable",
+            hdrs=None,
+            fp=None,
+        ),
+    ):
+        with pytest.raises(HTTPAIClientError, match="status 503"):
+            client.generate_response("hello")
+
+
+def test_http_ai_client_raises_on_socket_timeout() -> None:
+    client = HTTPAIClient(base_url="http://127.0.0.1:11434", timeout_seconds=1.0)
+
+    with patch("urllib.request.urlopen", side_effect=socket.timeout("timed out")):
+        with pytest.raises(HTTPAIClientError, match="timed out"):
             client.generate_response("hello")
 
 

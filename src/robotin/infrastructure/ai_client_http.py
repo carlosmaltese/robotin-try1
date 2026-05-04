@@ -1,5 +1,6 @@
 import json
 import os
+import socket
 from urllib import error, request
 
 from robotin.interfaces.ai_client import AIClient
@@ -40,10 +41,14 @@ class HTTPAIClient(AIClient):
                     raise HTTPAIClientError(f"Local AI server returned status {status_code}")
 
                 raw_body = response.read().decode("utf-8")
-        except error.URLError as exc:
-            raise HTTPAIClientError(f"Local AI request failed: {exc}") from exc
+        except error.HTTPError as exc:
+            raise HTTPAIClientError(f"Local AI server returned status {exc.code}") from exc
+        except socket.timeout as exc:
+            raise HTTPAIClientError("Local AI request timed out") from exc
         except TimeoutError as exc:
             raise HTTPAIClientError("Local AI request timed out") from exc
+        except error.URLError as exc:
+            raise HTTPAIClientError(f"Local AI request failed: {exc}") from exc
 
         try:
             data = json.loads(raw_body)
