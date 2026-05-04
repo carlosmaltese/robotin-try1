@@ -1,7 +1,6 @@
 from collections.abc import Callable
 
-from robotin.application.controller import RobotController
-from robotin.domain.robot_state import RobotState
+from robotin.application.runtime import create_runtime, recover_to_idle_after_error
 from robotin.infrastructure.ai_client_mock import MockAIClient
 from robotin.infrastructure.display_mock import MockDisplay
 from robotin.state_machine import StateMachine
@@ -14,13 +13,14 @@ def main(
     display = MockDisplay()
     ai_client = MockAIClient()
     state_machine = StateMachine()
-    controller = RobotController(
+
+    runtime = create_runtime(
         state_machine=state_machine,
         display=display,
         ai_client=ai_client,
     )
 
-    display.show_state(state_machine.current_state)
+    runtime.display.show_state(runtime.state_machine.current_state)
     output_func("Robotin started successfully.")
     output_func("Type a message and press Enter. Type 'exit' to quit.")
 
@@ -34,22 +34,13 @@ def main(
                 output_func("Please type a message or 'exit'.")
                 continue
 
-            response = controller.handle_text_turn(user_text)
+            response = runtime.controller.handle_text_turn(user_text)
             output_func(f"Robotin: {response}")
         except (KeyboardInterrupt, EOFError):
             output_func("\nShutting down Robotin.")
             return
         except Exception as exc:
-            if state_machine.current_state != RobotState.ERROR:
-                try:
-                    state_machine.transition_to(RobotState.ERROR)
-                except ValueError:
-                    pass
-            display.show_state(state_machine.current_state)
-            output_func(f"Robotin error: {exc}")
-            if state_machine.current_state == RobotState.ERROR:
-                state_machine.transition_to(RobotState.IDLE)
-                display.show_state(state_machine.current_state)
+            recover_to_idle_after_error(runtime, output_func, exc)
 
 
 if __name__ == "__main__":
