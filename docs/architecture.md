@@ -66,12 +66,17 @@ Interfaces must be small and implementation-independent.
 
 The infrastructure layer contains concrete implementations.
 
-Examples:
+Implemented now:
 
 - mock display,
 - mock TTS,
 - mock AI client,
 - local HTTP AI client,
+- mock microphone,
+- mock wake word detector.
+
+Planned later:
+
 - Raspberry Pi display adapter,
 - Piper TTS adapter,
 - openWakeWord adapter.
@@ -165,5 +170,7 @@ Initial tests should focus on:
 - mock adapters,
 - error handling,
 - interface-driven design.
+
+Current test coverage includes deterministic tests for state machine, events, controller flow, mock AI/TTS/microphone/wake-word adapters, and local HTTP AI adapter behavior.
 
 Hardware tests come later and must be separated from normal Windows tests.

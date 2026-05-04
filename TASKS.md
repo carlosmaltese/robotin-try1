@@ -26,7 +26,7 @@ Use one of:
 
 ## Task 001 - Project foundation
 
-Status: pending
+Status: done
 
 ### Goal
 
@@ -79,7 +79,7 @@ Out of scope:
 
 ## Task 002 - Event model
 
-Status: pending
+Status: done
 
 ### Goal
 
@@ -125,7 +125,7 @@ Out of scope:
 
 ## Task 003 - Application controller
 
-Status: pending
+Status: done
 
 ### Goal
 
@@ -165,7 +165,7 @@ Out of scope:
 
 ## Task 004 - Mock AI client
 
-Status: pending
+Status: done
 
 ### Goal
 
@@ -205,7 +205,7 @@ Out of scope:
 
 ## Task 005 - Basic text conversation flow
 
-Status: pending
+Status: done
 
 ### Goal
 
@@ -252,7 +252,7 @@ Out of scope:
 
 ## Task 006 - Mock TTS
 
-Status: pending
+Status: done
 
 ### Goal
 
@@ -292,7 +292,7 @@ Out of scope:
 
 ## Task 007 - Local HTTP AI client
 
-Status: pending
+Status: done
 
 ### Goal
 
@@ -334,7 +334,7 @@ Out of scope:
 
 ## Task 008 - Microphone and wake word mocks
 
-Status: pending
+Status: done
 
 ### Goal
 

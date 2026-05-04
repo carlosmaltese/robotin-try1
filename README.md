@@ -32,6 +32,16 @@ The first goal is to build the base robot brain with:
 - tests,
 - clean architecture.
 
+## Current implemented capabilities
+
+- State machine and robot events are implemented and tested.
+- Application flow is implemented in [`RobotController`](src/robotin/application/controller.py) with states `idle → listening → processing → speaking → idle`.
+- Interface contracts are available for display, AI client, TTS, microphone, and wake word.
+- Infrastructure includes deterministic mocks for display, AI, TTS, microphone, and wake word.
+- Local HTTP AI adapter is implemented in [`src/robotin/infrastructure/ai_client_http.py`](src/robotin/infrastructure/ai_client_http.py) with explicit timeout and clear error handling.
+- Console entrypoint is available via [`python -m robotin.main`](src/robotin/main.py).
+- Automated tests cover domain, application flow, mock adapters, and HTTP AI adapter behavior.
+
 ## Architecture principles
 
 Robotin follows a modular architecture:
