@@ -1,10 +1,10 @@
 import json
-import socket
 from unittest.mock import patch
 from urllib import error
 
 import pytest
 
+from robotin.config import RobotinConfig
 from robotin.infrastructure.ai_client_http import HTTPAIClient, HTTPAIClientError
 
 
@@ -74,7 +74,7 @@ def test_http_ai_client_raises_on_http_error_status() -> None:
 def test_http_ai_client_raises_on_socket_timeout() -> None:
     client = HTTPAIClient(base_url="http://127.0.0.1:11434", timeout_seconds=1.0)
 
-    with patch("urllib.request.urlopen", side_effect=socket.timeout("timed out")):
+    with patch("urllib.request.urlopen", side_effect=TimeoutError("timed out")):
         with pytest.raises(HTTPAIClientError, match="timed out"):
             client.generate_response("hello")
 
@@ -90,7 +90,8 @@ def test_http_ai_client_raises_on_invalid_json() -> None:
 def test_http_ai_client_raises_when_response_field_missing() -> None:
     client = HTTPAIClient(base_url="http://127.0.0.1:11434", timeout_seconds=1.0)
 
-    with patch("urllib.request.urlopen", return_value=_FakeHTTPResponse('{"message": "ok"}', status=200)):
+    fake_response = _FakeHTTPResponse('{"message": "ok"}', status=200)
+    with patch("urllib.request.urlopen", return_value=fake_response):
         with pytest.raises(HTTPAIClientError, match="missing 'response' text"):
             client.generate_response("hello")
 
@@ -99,3 +100,44 @@ def test_http_ai_client_rejects_non_positive_timeout() -> None:
     with pytest.raises(ValueError, match="greater than 0"):
         HTTPAIClient(base_url="http://127.0.0.1:11434", timeout_seconds=0)
 
+
+def test_http_ai_client_rejects_file_scheme() -> None:
+    with pytest.raises(ValueError, match="http or https"):
+        HTTPAIClient(base_url="file:///etc/passwd", timeout_seconds=1.0)
+
+
+def test_http_ai_client_rejects_non_url_string() -> None:
+    with pytest.raises(ValueError, match="http or https"):
+        HTTPAIClient(base_url="not-a-url", timeout_seconds=1.0)
+
+
+def test_http_ai_client_rejects_empty_base_url() -> None:
+    with pytest.raises(ValueError, match="http or https"):
+        HTTPAIClient(base_url="", timeout_seconds=1.0)
+
+
+def test_http_ai_client_accepts_https_scheme() -> None:
+    client = HTTPAIClient(base_url="https://localhost", timeout_seconds=1.0)
+    assert client is not None
+
+
+def test_http_ai_client_uses_config_when_provided() -> None:
+    config = RobotinConfig(
+        ai_base_url="http://custom-host:9999",
+        ai_timeout_seconds=5.5,
+    )
+    client = HTTPAIClient(config=config)
+
+    assert client._base_url == "http://custom-host:9999"
+    assert client._timeout_seconds == 5.5
+
+
+def test_http_ai_client_explicit_params_override_config() -> None:
+    config = RobotinConfig(
+        ai_base_url="http://from-config:9999",
+        ai_timeout_seconds=5.5,
+    )
+    client = HTTPAIClient(base_url="http://from-param:8888", timeout_seconds=2.0, config=config)
+
+    assert client._base_url == "http://from-param:8888"
+    assert client._timeout_seconds == 2.0

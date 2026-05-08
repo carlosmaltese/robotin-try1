@@ -17,4 +17,3 @@ def test_mock_wake_word_returns_detections_in_order_then_false() -> None:
     assert detector.detect_once() is False
     assert detector.detect_once() is True
     assert detector.detect_once() is False
-

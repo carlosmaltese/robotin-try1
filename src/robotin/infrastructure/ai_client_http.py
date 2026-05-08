@@ -1,8 +1,9 @@
 import json
 import os
-import socket
 from urllib import error, request
+from urllib.parse import urlsplit
 
+from robotin.config import RobotinConfig
 from robotin.interfaces.ai_client import AIClient
 
 
@@ -15,11 +16,28 @@ class HTTPAIClient(AIClient):
         self,
         base_url: str | None = None,
         timeout_seconds: float | None = None,
+        config: RobotinConfig | None = None,
     ) -> None:
-        self._base_url = (base_url or os.getenv("ROBOTIN_AI_BASE_URL") or "http://127.0.0.1:8000").rstrip("/")
-        self._timeout_seconds = timeout_seconds if timeout_seconds is not None else float(
-            os.getenv("ROBOTIN_AI_TIMEOUT_SECONDS", "3.0")
-        )
+        _config_url = config.ai_base_url if config is not None else None
+        _config_timeout = config.ai_timeout_seconds if config is not None else None
+
+        if base_url is not None:
+            resolved_url = base_url
+        elif _config_url is not None:
+            resolved_url = _config_url
+        else:
+            resolved_url = os.getenv("ROBOTIN_AI_BASE_URL") or "http://127.0.0.1:8000"
+        self._base_url = resolved_url.rstrip("/")
+        if timeout_seconds is not None:
+            self._timeout_seconds = timeout_seconds
+        elif _config_timeout is not None:
+            self._timeout_seconds = _config_timeout
+        else:
+            self._timeout_seconds = float(os.getenv("ROBOTIN_AI_TIMEOUT_SECONDS", "3.0"))
+
+        parsed = urlsplit(self._base_url)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            raise ValueError(f"base_url must use http or https scheme, got: {self._base_url!r}")
 
         if self._timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be greater than 0")
@@ -43,8 +61,6 @@ class HTTPAIClient(AIClient):
                 raw_body = response.read().decode("utf-8")
         except error.HTTPError as exc:
             raise HTTPAIClientError(f"Local AI server returned status {exc.code}") from exc
-        except socket.timeout as exc:
-            raise HTTPAIClientError("Local AI request timed out") from exc
         except TimeoutError as exc:
             raise HTTPAIClientError("Local AI request timed out") from exc
         except error.URLError as exc:
@@ -60,4 +76,3 @@ class HTTPAIClient(AIClient):
             raise HTTPAIClientError("Local AI response payload is missing 'response' text")
 
         return reply
-

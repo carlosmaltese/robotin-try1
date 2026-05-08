@@ -161,6 +161,14 @@ Initial options:
 
 Do not introduce complex configuration frameworks early.
 
+## Display rendering ownership
+
+`RobotController` is solely responsible for calling `display.show_state()` after every state transition. `main.py` does not render state directly.
+
+## Error responsibilities
+
+`RobotController` logs AI client failures but re-raises the exception unchanged. `recover_to_idle_after_error` in `runtime.py` is the single point responsible for moving the state machine to `ERROR` and back to `IDLE`. This keeps error recovery centralized and testable.
+
 ## Testing strategy
 
 Initial tests should focus on:

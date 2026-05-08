@@ -9,4 +9,3 @@ class MockMicrophone(Microphone):
         if not self._inputs:
             return None
         return self._inputs.pop(0)
-

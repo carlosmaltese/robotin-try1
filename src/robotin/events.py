@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class EventType(str, Enum):
+class EventType(StrEnum):
     ACTIVATION_REQUESTED = "activation_requested"
     TEXT_RECEIVED = "text_received"
     AI_RESPONSE_RECEIVED = "ai_response_received"

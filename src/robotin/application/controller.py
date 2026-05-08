@@ -1,8 +1,12 @@
+import logging
+
 from robotin.domain.robot_state import RobotState
 from robotin.interfaces.ai_client import AIClient
 from robotin.interfaces.display import Display
 from robotin.interfaces.tts import TTS
 from robotin.state_machine import StateMachine
+
+_logger = logging.getLogger("robotin")
 
 
 class RobotController:
@@ -35,4 +39,3 @@ class RobotController:
         self._state_machine.transition_to(RobotState.IDLE)
         self._display.show_state(self._state_machine.current_state)
         return response
-

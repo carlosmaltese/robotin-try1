@@ -8,32 +8,27 @@ Initial phase:
 - No real AI protocol is required.
 - Mock adapters are used first.
 
-## Future AI client protocol
+## AI client protocol
 
-Robotin may communicate with a local AI backend over HTTP.
+Robotin communicates with a local AI backend over HTTP via `HTTPAIClient`.
 
-The final protocol is not decided yet.
+> This document mirrors `src/robotin/infrastructure/ai_client_http.py`. Keep them in sync.
 
-Initial likely request shape:
-
-```json
-{
-  "input": "Hello Robotin",
-  "context": {
-    "robot_state": "listening"
-  }
-}
-```
-
-Initial likely response shape:
+Request shape (`POST /generate`):
 
 ```json
 {
-  "text": "Hello! I am Robotin."
+  "text": "Hello Robotin"
 }
 ```
 
-This is only a draft and should not be treated as implemented until the corresponding task exists.
+Response shape:
+
+```json
+{
+  "response": "Hello! I am Robotin."
+}
+```
 
 ## Future STT protocol
 

@@ -20,7 +20,5 @@ class StateMachine:
     def transition_to(self, next_state: RobotState) -> None:
         allowed = self._ALLOWED_TRANSITIONS[self._state]
         if next_state not in allowed:
-            raise ValueError(
-                f"Invalid transition from {self._state.value} to {next_state.value}"
-            )
+            raise ValueError(f"Invalid transition from {self._state.value} to {next_state.value}")
         self._state = next_state

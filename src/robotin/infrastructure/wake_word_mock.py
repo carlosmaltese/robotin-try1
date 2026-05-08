@@ -9,4 +9,3 @@ class MockWakeWordDetector(WakeWordDetector):
         if not self._detections:
             return False
         return self._detections.pop(0)
-

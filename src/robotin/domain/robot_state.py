@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class RobotState(str, Enum):
+class RobotState(StrEnum):
     IDLE = "idle"
     LISTENING = "listening"
     PROCESSING = "processing"

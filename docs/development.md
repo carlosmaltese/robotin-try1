@@ -137,6 +137,15 @@ real adapter
 manual hardware test
 ```
 
+## Linting and formatting
+
+Run before committing:
+
+```powershell
+ruff check src tests
+ruff format src tests
+```
+
 ## Review checklist
 
 Before finishing a task, check:

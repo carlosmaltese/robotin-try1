@@ -7,4 +7,3 @@ class MockTTS(TTS):
 
     def speak(self, text: str) -> None:
         self.spoken_texts.append(text)
-

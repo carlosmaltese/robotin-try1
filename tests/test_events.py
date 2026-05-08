@@ -1,6 +1,6 @@
 from robotin.events import (
-    AIResponseReceivedEvent,
     ActivationRequestedEvent,
+    AIResponseReceivedEvent,
     ErrorOccurredEvent,
     EventType,
     ResetRequestedEvent,

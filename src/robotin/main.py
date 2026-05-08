@@ -1,6 +1,8 @@
+import logging
 from collections.abc import Callable
 
 from robotin.application.runtime import create_runtime, recover_to_idle_after_error
+from robotin.config import load_config
 from robotin.infrastructure.ai_client_mock import MockAIClient
 from robotin.infrastructure.display_mock import MockDisplay
 from robotin.state_machine import StateMachine
@@ -10,6 +12,8 @@ def main(
     input_func: Callable[[str], str] = input,
     output_func: Callable[[str], None] = print,
 ) -> None:
+    config = load_config()
+    logging.basicConfig(level=config.log_level)
     display = MockDisplay()
     ai_client = MockAIClient()
     state_machine = StateMachine()
@@ -20,7 +24,6 @@ def main(
         ai_client=ai_client,
     )
 
-    runtime.display.show_state(runtime.state_machine.current_state)
     output_func("Robotin started successfully.")
     output_func("Type a message and press Enter. Type 'exit' to quit.")
 
