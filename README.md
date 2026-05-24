@@ -37,10 +37,25 @@ The first goal is to build the base robot brain with:
 - State machine and robot events are implemented and tested.
 - Application flow is implemented in [`RobotController`](src/robotin/application/controller.py) with states `idle → listening → processing → speaking → idle`.
 - Interface contracts are available for display, AI client, TTS, microphone, and wake word.
-- Infrastructure includes deterministic mocks for display, AI, TTS, microphone, and wake word.
+- Interface contracts are available for STT as well.
+- Infrastructure includes deterministic mocks for display, AI, TTS, microphone, wake word, and STT.
+- Audio turn orchestration is now explicit in [`AudioTurnOrchestrator`](src/robotin/application/audio_turn.py), coordinating `wake_word -> STT -> controller` for one non-blocking cycle.
+- STT selection is config-driven (`ROBOTIN_STT_MODE=mock|remote`) with strict validation.
+- A first real-ready STT adapter stub exists in [`src/robotin/infrastructure/stt_remote.py`](src/robotin/infrastructure/stt_remote.py).
+- Runtime composition includes a wake-word provider boundary in [`create_runtime()`](src/robotin/application/runtime.py), defaulting to a deterministic mock adapter.
 - Local HTTP AI adapter is implemented in [`src/robotin/infrastructure/ai_client_http.py`](src/robotin/infrastructure/ai_client_http.py) with explicit timeout and clear error handling.
+- Runtime composition is centralized in [`create_runtime()`](src/robotin/application/runtime.py:24), which selects AI adapter from config (`mock` by default, `http` optional).
 - Console entrypoint is available via [`python -m robotin.main`](src/robotin/main.py).
 - Automated tests cover domain, application flow, mock adapters, and HTTP AI adapter behavior.
+
+### Audio direction (Raspberry Pi focused)
+
+- Long-term input path: USB microphone array adapter in infrastructure.
+- Wake-word detection: local openWakeWord adapter in infrastructure.
+- STT provider boundary: local STT provider and remote STT provider behind [`SpeechToText`](src/robotin/interfaces/stt.py).
+- TTS provider boundary: local Piper adapter behind [`TTS`](src/robotin/interfaces/tts.py).
+- Application orchestration remains hardware-agnostic and testable.
+- No ESP32-specific code is included at this stage.
 
 ## Architecture principles
 

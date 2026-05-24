@@ -44,6 +44,7 @@ Examples:
 - moving through robot states,
 - calling AI through an interface,
 - calling TTS through an interface,
+- orchestrating wake-word + STT + controller turn through application policy,
 - updating the display through an interface.
 
 The application layer depends on interfaces, not concrete adapters.
@@ -73,13 +74,22 @@ Implemented now:
 - mock AI client,
 - local HTTP AI client,
 - mock microphone,
-- mock wake word detector.
+- mock wake word detector,
+- mock STT.
+
+Current application audio orchestration:
+
+- [`AudioTurnOrchestrator`](../src/robotin/application/audio_turn.py) coordinates one non-blocking `wake_word -> STT -> controller` cycle.
+- Runtime wiring in [`create_runtime()`](../src/robotin/application/runtime.py) injects wake-word and STT providers.
+- This keeps the conversation/audio policy in application code and all hardware specifics in infrastructure adapters.
 
 Planned later:
 
 - Raspberry Pi display adapter,
 - Piper TTS adapter,
-- openWakeWord adapter.
+- openWakeWord adapter,
+- USB microphone array adapter,
+- local STT adapter implementation.
 
 Only this layer may depend on real hardware libraries or external integration packages.
 
@@ -149,6 +159,8 @@ python -m robotin.main
 
 `main.py` may wire concrete implementations together, but core logic should live elsewhere.
 
+Runtime composition currently lives in [`create_runtime()`](../src/robotin/application/runtime.py), and [`main()`](../src/robotin/main.py) remains a thin CLI entrypoint.
+
 ## Configuration
 
 Configuration should start simple.
@@ -160,6 +172,20 @@ Initial options:
 - simple config module
 
 Do not introduce complex configuration frameworks early.
+
+Current AI selection config:
+
+- `ROBOTIN_AI_MODE` (`mock` or `http`, default `mock`)
+- `ROBOTIN_AI_BASE_URL`
+- `ROBOTIN_AI_TIMEOUT_SECONDS`
+
+Current STT selection config:
+
+- `ROBOTIN_STT_MODE` (`mock` or `remote`, default `mock`)
+- `ROBOTIN_STT_BASE_URL`
+- `ROBOTIN_STT_TIMEOUT_SECONDS`
+
+Wake-word selection is currently mock-only in runtime composition and remains interface-driven for future openWakeWord adapter integration.
 
 ## Display rendering ownership
 

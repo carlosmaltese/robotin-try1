@@ -176,9 +176,11 @@ When proposing or implementing a task, use this structure:
 ### Allowed files
 
 - `src/robotin/interfaces/microphone.py`
+- `src/robotin/interfaces/stt.py`
 - `src/robotin/interfaces/tts.py`
 - `src/robotin/interfaces/wake_word.py`
 - `src/robotin/infrastructure/*microphone*`
+- `src/robotin/infrastructure/*stt*`
 - `src/robotin/infrastructure/*tts*`
 - `src/robotin/infrastructure/*wake_word*`
 

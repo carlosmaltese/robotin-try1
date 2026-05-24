@@ -30,7 +30,7 @@ def test_main_recovers_and_continues_after_ai_error() -> None:
     failing_client = MagicMock(spec=MockAIClient)
     failing_client.generate_response.side_effect = RuntimeError("AI down")
 
-    with patch("robotin.main.MockAIClient", return_value=failing_client):
+    with patch("robotin.application.runtime.MockAIClient", return_value=failing_client):
         main(input_func=failing_then_exit, output_func=outputs.append)
 
     assert any("Robotin error:" in line for line in outputs)

@@ -3,7 +3,6 @@ from collections.abc import Callable
 
 from robotin.application.runtime import create_runtime, recover_to_idle_after_error
 from robotin.config import load_config
-from robotin.infrastructure.ai_client_mock import MockAIClient
 from robotin.infrastructure.display_mock import MockDisplay
 from robotin.state_machine import StateMachine
 
@@ -15,13 +14,12 @@ def main(
     config = load_config()
     logging.basicConfig(level=config.log_level)
     display = MockDisplay()
-    ai_client = MockAIClient()
     state_machine = StateMachine()
 
     runtime = create_runtime(
         state_machine=state_machine,
         display=display,
-        ai_client=ai_client,
+        config=config,
     )
 
     output_func("Robotin started successfully.")

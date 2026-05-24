@@ -373,6 +373,141 @@ Out of scope:
 
 ---
 
+## Task 009 - Speech-to-text interface and mock
+
+Status: done
+
+### Goal
+
+Add a small speech-to-text contract and deterministic mock implementation so Robotin can model voice transcription without requiring real microphone hardware, audio libraries, or a local STT service.
+
+### Scope
+
+Included:
+
+- `src/robotin/interfaces/stt.py`.
+- `src/robotin/infrastructure/stt_mock.py`.
+- Tests for deterministic transcript behavior.
+- Keep the interface independent from audio framework details.
+
+Out of scope:
+
+- Real STT integration.
+- External local STT HTTP adapter.
+- Audio recording or audio buffers.
+- Continuous listening loops.
+- Changes to `main.py` or `RobotController`.
+- Wake word orchestration.
+
+### Acceptance criteria
+
+- A small STT interface exists and returns text or `None` when no transcript is available.
+- A mock STT implementation returns predefined transcripts in order.
+- The mock returns `None` when no transcript remains.
+- Tests pass without microphone hardware, audio devices, network, or third-party runtime dependencies.
+- Domain and application layers do not import the mock or any infrastructure module.
+
+### Recommended implementing agent
+
+- `@voice`
+
+### Review agents
+
+- `@tester`
+- `@safety`
+
+---
+
+## Task 010 - STT mode configuration and remote STT stub
+
+Status: done
+
+### Goal
+
+Add strict STT mode configuration and runtime-driven STT adapter selection, including a first real-ready remote STT adapter stub.
+
+### Scope
+
+Included:
+
+- Add `stt_mode` to `RobotinConfig` with strict validation.
+- Support `ROBOTIN_STT_MODE=mock|remote`.
+- Support `ROBOTIN_STT_BASE_URL` and `ROBOTIN_STT_TIMEOUT_SECONDS`.
+- Keep `MockSpeechToText` available.
+- Add `RemoteSpeechToText` stub in infrastructure.
+- Update `create_runtime()` to select STT adapter from config.
+- Focused deterministic tests for config validation and STT runtime selection.
+
+Out of scope:
+
+- Real STT HTTP transcription implementation.
+- Audio capture and buffering.
+- Continuous listening loops.
+- Changes to `RobotController` flow.
+
+### Acceptance criteria
+
+- Invalid STT mode fails clearly.
+- Invalid STT timeout fails clearly.
+- Runtime selects mock STT when mode is `mock`.
+- Runtime selects remote STT stub when mode is `remote`.
+- Existing tests remain passing.
+
+### Recommended implementing agent
+
+- `@application`
+
+### Review agents
+
+- `@tester`
+- `@safety`
+
+---
+
+## Task 011 - Audio turn orchestrator boundary
+
+Status: done
+
+### Goal
+
+Introduce an explicit application-level audio turn orchestrator that coordinates one wake-word-driven voice turn while keeping hardware and provider details isolated behind interfaces.
+
+### Scope
+
+Included:
+
+- Add `AudioTurnOrchestrator` in `src/robotin/application/audio_turn.py`.
+- Model one non-blocking cycle: wake word check -> STT transcription -> controller text turn.
+- Wire wake-word dependency into centralized runtime composition.
+- Keep default deterministic mock wake-word adapter.
+- Add focused tests for orchestrator behavior and runtime wake-word wiring.
+
+Out of scope:
+
+- Real openWakeWord integration.
+- Real USB microphone array integration.
+- Real local STT implementation.
+- Continuous audio loops in `main.py`.
+- ESP32-related code, protocols, or motion abstractions.
+
+### Acceptance criteria
+
+- Application has explicit audio orchestration policy that is hardware-agnostic.
+- Runtime exposes wake-word boundary as an injectable dependency.
+- Orchestrator is deterministic and testable with mocks.
+- Existing and new tests pass on Windows without audio hardware.
+
+### Recommended implementing agent
+
+- `@application`
+
+### Review agents
+
+- `@tester`
+- `@safety`
+
+---
+
 ## Backlog ideas
 
 These are not initial tasks. Do not implement them until earlier tasks are stable.
