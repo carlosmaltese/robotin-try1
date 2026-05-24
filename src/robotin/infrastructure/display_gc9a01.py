@@ -65,8 +65,8 @@ class GC9A01DualDisplay(Display):
     def show_visual_state(self, visual_state: EyeVisualState) -> None:
         image = self._renderer.render(visual_state)
         self._ensure_initialized()
-        self._left_display.display(image)
-        self._right_display.display(image)
+        self._left_display.image(image)
+        self._right_display.image(image)
 
     @classmethod
     def map_robot_state(cls, state: RobotState) -> EyeVisualState:
@@ -87,7 +87,7 @@ class GC9A01DualDisplay(Display):
         # Lazy imports keep non-Raspberry environments testable.
         import board  # type: ignore[import-not-found]
         import digitalio  # type: ignore[import-not-found]
-        import gc9a01  # type: ignore[import-not-found]
+        from adafruit_rgb_display import gc9a01a  # type: ignore[import-not-found]
         import busio  # type: ignore[import-not-found]
 
         spi = busio.SPI(clock=board.SCLK, MOSI=board.MOSI)
@@ -101,7 +101,7 @@ class GC9A01DualDisplay(Display):
 
         def factory(*, cs: int) -> Any:
             cs_pin = digitalio.DigitalInOut(getattr(board, f"D{cs}"))
-            return gc9a01.GC9A01(
+            return gc9a01a.GC9A01A(
                 spi,
                 cs=cs_pin,
                 dc=dc,
@@ -110,7 +110,6 @@ class GC9A01DualDisplay(Display):
                 height=self._height,
                 rotation=self._rotation,
                 baudrate=self._spi_hz,
-                backlight=bl,
             )
 
         return factory
