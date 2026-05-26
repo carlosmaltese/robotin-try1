@@ -2,12 +2,22 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+import os
 import time
 from typing import Any
 
 from robotin.domain.robot_state import RobotState
 from robotin.infrastructure.eyes_renderer import EyeVisualState, EyesRenderer
 from robotin.interfaces.display import Display
+
+
+def _diag_enabled() -> bool:
+    return os.getenv("ROBOTIN_DISPLAY_DIAG", "0") == "1"
+
+
+def _diag(message: str) -> None:
+    if _diag_enabled():
+        print(f"[display_gc9a01] {message}")
 
 
 @dataclass(frozen=True)
@@ -68,6 +78,12 @@ class GC9A01DualDisplay(Display):
         timestamp = time.monotonic()
         left_image, right_image = self._renderer.render_pair(visual_state, timestamp=timestamp)
         self._ensure_initialized()
+        _diag(
+            "write "
+            f"state={visual_state} "
+            f"left_display_id={id(self._left_display)} right_display_id={id(self._right_display)} "
+            f"left_image_id={id(left_image)} right_image_id={id(right_image)}"
+        )
         self._left_display.image(left_image)
         self._right_display.image(right_image)
 
@@ -89,19 +105,38 @@ class GC9A01DualDisplay(Display):
 
     def _ensure_initialized(self) -> None:
         if self._left_display is not None and self._right_display is not None:
+            _diag(
+                "reuse displays "
+                f"left_display_id={id(self._left_display)} right_display_id={id(self._right_display)}"
+            )
             return
 
+        _diag(f"module_path={__file__}")
         factory = self._display_factory or self._build_default_factory()
+        _diag(
+            "init left pins "
+            f"cs={self._pins.left_cs_pin} dc={self._pins.left_dc_pin} rst={self._pins.left_rst_pin}"
+        )
         self._left_display = factory(
             cs=self._pins.left_cs_pin,
             dc=self._pins.left_dc_pin,
             rst=self._pins.left_rst_pin,
+        )
+        _diag(
+            "init right pins "
+            f"cs={self._pins.right_cs_pin} dc={self._pins.right_dc_pin} rst={self._pins.right_rst_pin}"
         )
         self._right_display = factory(
             cs=self._pins.right_cs_pin,
             dc=self._pins.right_dc_pin,
             rst=self._pins.right_rst_pin,
         )
+        _diag(
+            "init complete "
+            f"left_display_id={id(self._left_display)} right_display_id={id(self._right_display)}"
+        )
+        if self._left_display is self._right_display:
+            _diag("WARNING left_display and right_display reference the same object")
 
     def _build_default_factory(self) -> Callable[..., Any]:
         # Lazy imports keep non-Raspberry environments testable.
@@ -109,6 +144,14 @@ class GC9A01DualDisplay(Display):
         import digitalio  # type: ignore[import-not-found]
         from adafruit_rgb_display import gc9a01a  # type: ignore[import-not-found]
         import busio  # type: ignore[import-not-found]
+
+        _diag(
+            "imports "
+            f"board={getattr(board, '__file__', '<builtin>')} "
+            f"digitalio={getattr(digitalio, '__file__', '<builtin>')} "
+            f"gc9a01a={getattr(gc9a01a, '__file__', '<builtin>')} "
+            f"busio={getattr(busio, '__file__', '<builtin>')}"
+        )
 
         spi = busio.SPI(clock=board.SCLK, MOSI=board.MOSI)
 
